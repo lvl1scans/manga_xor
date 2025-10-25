@@ -1,21 +1,15 @@
 use pyo3::prelude::*;
-use pyo3::exceptions::PyValueError;
 use pyo3::types::{PyBytes, PyModule};
 use pyo3::Bound;
 
 // This macro exposes the Rust function to Python.
 // The name in Python will be `xor_decrypt`.
 #[pyfunction]
-fn xor_decrypt(py: Python, encrypted_data: &[u8], key_hex: &str) -> PyResult<Py<PyBytes>> {
+fn xor_decrypt(py: Python, encrypted_data: &[u8], key_bytes: &[u8]) -> PyResult<Py<PyBytes>> {
     // If the key is empty, just return a copy of the original data.
-    if key_hex.is_empty() {
+    if key_bytes.is_empty() {
         return Ok(PyBytes::new(py, encrypted_data).into());
     }
-
-    // Decode the hexadecimal key string into bytes.
-    // If the string is invalid hex, map the error to a Python ValueError.
-    let key_bytes = hex::decode(key_hex)
-        .map_err(|e| PyValueError::new_err(format!("Invalid hex key: {}", e)))?;
     
     // Create a mutable copy of the encrypted data. Working on a Vec<u8> is fast.
     let mut decrypted = encrypted_data.to_vec();
